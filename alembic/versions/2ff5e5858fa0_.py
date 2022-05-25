@@ -1,18 +1,17 @@
 """empty message
 
-Revision ID: 67978458255f
-Revises: fcea46aa0ac0
-Create Date: 2022-05-25 17:06:06.201247
+Revision ID: 2ff5e5858fa0
+Revises: 
+Create Date: 2022-05-25 17:36:30.622779
 
 """
-from email.policy import default
 from alembic import op
 import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '67978458255f'
-down_revision = 'fcea46aa0ac0'
+revision = '2ff5e5858fa0'
+down_revision = None
 branch_labels = None
 depends_on = None
 
