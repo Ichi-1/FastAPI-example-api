@@ -1,0 +1,9 @@
+venv/
+.vscode/
+__pycache__
+FoobarDB
+
+.env
+deprecated.py
+
+stackAPI.py
