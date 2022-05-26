@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr, conint
+from pydantic import BaseModel, EmailStr, conint, ValidationError
+from pydantic.class_validators import validator
 from datetime import datetime
 import typing
 
@@ -7,7 +8,7 @@ import typing
 # -----------> Users
 
 class UserCreate(BaseModel):
-    email: EmailStr
+    email: str
     password: str
 
 
