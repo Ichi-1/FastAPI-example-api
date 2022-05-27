@@ -10,8 +10,8 @@ import typing
 """  Users """
 
 class UserCreate(BaseModel):
-    email = 'Missing Field'
-    password = 'Missing Field'
+    email: str = 'placeholder'
+    password: str = 'placeholder'
 
     # class Config:
     #     orm_mode = True

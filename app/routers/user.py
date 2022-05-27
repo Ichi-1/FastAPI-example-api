@@ -14,13 +14,13 @@ router = APIRouter(
 def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
 
     # email field is missing
-    if user.email == 'Missing Field':
+    if user.email == 'placeholder':
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Specific field is missing: email'
         )
     # password field is missing
-    if user.password == 'Missing Field':
+    if user.password == 'placeholder':
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Specific field is missing: password'
