@@ -1,6 +1,5 @@
 from fastapi import status, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
-from validate_email import validate_email
 
 from .. import schema, models, utils
 from ..database import get_db
@@ -14,29 +13,22 @@ router = APIRouter(
 @router.post("/sign-in", status_code=status.HTTP_201_CREATED, response_model=schema.UserOut)
 def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
 
-    # email validation 
-    if not user.email:
+    # email field is missing
+    if user.email == 'Missing Field':
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Email cannot be empty'
+            detail='Specific field is missing: email'
         )
-
-    if not validate_email(user.email):
+    # password field is missing
+    if user.password == 'Missing Field':
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Invalid email format'
+            detail='Specific field is missing: password'
         )
-
-    # password validation
-    if len(user.password) < 4:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Password must be at least 4 characters long '
-        )
-
-    # если юзер уже есть - 400 
-    is_user_exist = db.query(models.User).filter(models.User.email == user.email).first()
-    if is_user_exist:
+    
+    # user already exist 
+    user_exist = db.query(models.User).filter(models.User.email == user.email).first()
+    if user_exist:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f'{user.email} already registered'

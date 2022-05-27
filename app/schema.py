@@ -1,15 +1,47 @@
-from pydantic import BaseModel, EmailStr, conint, ValidationError
+from pydantic import BaseModel, EmailStr, conint
 from pydantic.class_validators import validator
 from datetime import datetime
+from fastapi import HTTPException, status
+from validate_email import validate_email
 import typing
 
 
 
-# -----------> Users
+"""  Users """
 
 class UserCreate(BaseModel):
-    email: str
-    password: str
+    email = 'Missing Field'
+    password = 'Missing Field'
+
+    # class Config:
+    #     orm_mode = True
+
+
+    @validator('email')
+    def is_email_empty(cls, credential):
+        if not credential:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Email field cannot be empty'
+            )
+        elif not validate_email(credential):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Email is not valid'
+            )
+        return credential
+        
+    @validator('password')
+    def is_password_short(cls, password):
+        if len(password) < 4:
+            raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail='Password must be at least 4 characters long'
+        )
+        return password
+
+    
+
 
 
 class UserOut(BaseModel):
@@ -27,7 +59,7 @@ class UserLogin(BaseModel):
 
 
 
-# -----------> Posts
+""" Posts """
 
 class PostBase(BaseModel):
     title: str
@@ -57,7 +89,7 @@ class PostVotes(BaseModel):
         orm_mode = True
 
 
-# -----------> Posts Token Schemas
+""" Tokens """
 
 class Token(BaseModel):
     access_token: str
@@ -68,7 +100,7 @@ class TokenData(BaseModel):
 
 
 
-# -----------> Vote 
+""" Votes """
 
 class Vote(BaseModel):
     post_id: int
