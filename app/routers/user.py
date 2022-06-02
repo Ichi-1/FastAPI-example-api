@@ -10,7 +10,11 @@ router = APIRouter(
 )
 
 
-@router.post("/sign-in", status_code=status.HTTP_201_CREATED, response_model=schema.UserOut)
+@router.post(
+    "/sign-in",
+    status_code=status.HTTP_201_CREATED,
+    response_model=schema.UserOut
+)
 def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
 
     # email field is missing
@@ -25,16 +29,16 @@ def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail='Specific field is missing: password'
         )
-    
-    # user already exist 
-    user_exist = db.query(models.User).filter(models.User.email == user.email).first()
+
+    # user already exist
+    user_exist = db.query(models.User) \
+        .filter(models.User.email == user.email).first()
     if user_exist:
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail=f'{user.email} already registered'
         )
-    
-    
+
     hash_pwd = utils.hash(user.password)
     user.password = hash_pwd
 
@@ -46,9 +50,10 @@ def create_user(user: schema.UserCreate, db: Session = Depends(get_db)):
     return new_user
 
 
-
-@router.get("/{id}", response_model=schema.UserOut)
-def get_user(id:int, db: Session = Depends(get_db)):
+@router.get(
+    "/{id}", response_model=schema.UserOut
+)
+def get_user(id: int, db: Session = Depends(get_db)):
     user = db.query(models.User).filter(models.User.id == id).first()
     if not user:
         raise HTTPException(

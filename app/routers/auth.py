@@ -5,29 +5,34 @@ from .. import schema, models, database, utils, oauth2
 
 
 router = APIRouter(
-    prefix='/users', 
+    prefix='/users',
     tags=['Auth']
 )
 
 
-@router.post('/login', response_model=schema.Token)
-def login(user_credentials: OAuth2 = Depends(), db: Session = Depends(database.get_db)):
+@router.post(
+    '/login', response_model=schema.Token
+)
+def login(
+    user_credentials: OAuth2 = Depends(),
+    db: Session = Depends(database.get_db)
+):
 
-    user = db.query(models.User).filter(models.User.email == user_credentials.username).first()
+    user = db.query(models.User) \
+        .filter(models.User.email == user_credentials.username).first()
 
-    #user validation 
+    # user validation
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, 
-            detail=f'Invalid credentials'
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='Invalid credentials'
         )
 
     if not utils.verify(user_credentials.password, user.password):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail=f'Invalid credentials'
+            detail='Invalid credentials'
         )
-    
-    access_token = oauth2.create_access_token(payload = { "user_id": user.id })
+    access_token = oauth2.create_access_token(payload={"user_id": user.id})
 
     return {"access_token": access_token, "token_type": "Bearer"}

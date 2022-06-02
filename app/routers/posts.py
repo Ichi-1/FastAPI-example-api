@@ -1,9 +1,5 @@
 from fastapi import (
-    Response, 
-    status, 
-    HTTPException, 
-    Depends, 
-    APIRouter
+    Response, status, HTTPException, Depends, APIRouter
 )
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -22,27 +18,25 @@ router = APIRouter(
 
 # --------------- request Get Methods
 
-@router.get("/", response_model=List[schema.PostVotes])
+@router.get(
+    "/", response_model=List[schema.PostVotes]
+)
 # @router.get("/")
 def get_posts(
-        db: Session = Depends(get_db), 
-        current_user: int = Depends(oauth2.get_current_user), 
-        search: Optional[str] = '',
-        limit: int = 10,
-        skip: int = 0,
-    ):
-    
-    # posts = (
-    #     db.query(models.Post)
-    #     .filter(models.Post.content.contains(search))
-    #     .limit(limit)
-    #     .offset(skip)
-    #     .all()
-    # )
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user),
+    search: Optional[str] = '',
+    limit: int = 10,
+    skip: int = 0,
+):
 
     posts = (
         db.query(models.Post, func.count(models.Votes.post_id).label('likes'))
-        .join(models.Votes, models.Votes.post_id == models.Post.id, isouter=True)
+        .join(
+            models.Votes,
+            models.Votes.post_id == models.Post.id,
+            isouter=True
+        )
         .group_by(models.Post.id)
         .filter(models.Post.content.contains(search))
         .limit(limit)
@@ -52,53 +46,52 @@ def get_posts(
 
     if not posts:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
-            detail=f"Posts collection is empty"
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Posts collection is empty"
         )
 
     return posts
 
 
-
-@router.get("/{id}", response_model=schema.PostVotes)
+@router.get(
+    "/{id}", response_model=schema.PostVotes
+)
 def get_post(
-        id: int, 
-        db: Session = Depends(get_db), 
+        id: int,
+        db: Session = Depends(get_db),
         current_user: int = Depends(oauth2.get_current_user)
-    ):
-
-    # post = db.query(models.Post).filter(models.Post.id == id).first()
+):
 
     post = (
         db.query(models.Post, func.count(models.Votes.post_id).label('likes'))
-        .join(models.Votes, models.Votes.post_id == models.Post.id, isouter=True)
+        .join(
+            models.Votes,
+            models.Votes.post_id == models.Post.id,
+            isouter=True
+        )
         .group_by(models.Post.id)
         .filter(models.Post.id == id).first()
     )
-    
-    if post == None:
+
+    if post is not None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"post with id:{id} was not found"
         )
-    
+
     return post
 
 
-
-
-
-
-# --------------- request Post 
-
-@router.post("/", status_code=status.HTTP_201_CREATED, response_model=schema.Post)
+@router.post(
+    "/", status_code=status.HTTP_201_CREATED, response_model=schema.Post
+)
 def create_post(
-        post: schema.PostCreate, 
-        db: Session = Depends(get_db), 
-        current_user: int = Depends(oauth2.get_current_user)
-    ):
+    post: schema.PostCreate,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
 
-    new_post = models.Post(owner_id = current_user.id, **post.dict())
+    new_post = models.Post(owner_id=current_user.id, **post.dict())
     db.add(new_post)
     db.commit()
     db.refresh(new_post)
@@ -106,25 +99,23 @@ def create_post(
     return new_post
 
 
-
-# --------------- request Delete 
-
-@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{id}", status_code=status.HTTP_204_NO_CONTENT
+)
 def delete_post(
-        id:int, 
-        db: Session = Depends(get_db), 
-        current_user: int = Depends(oauth2.get_current_user)
-    ):
+    id: int,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
 
     post_query = db.query(models.Post).filter(models.Post.id == id)
     post = post_query.first()
 
-    if post == None:
+    if post is not None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"post_id: {id} is missing"
         )
-    
     if post.owner_id != current_user.id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -135,24 +126,26 @@ def delete_post(
     db.commit()
 
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-    
 
 
-# --------------- request Update 
+# --------------- request Update
 
-@router.put("/{id}", response_model=schema.Post)
+@router.put(
+    "/{id}", response_model=schema.Post
+)
 def update_post(
-        id:int, upd_post:schema.PostCreate, 
-        db: Session = Depends(get_db), 
-        current_user: int = Depends(oauth2.get_current_user)
-    ):
+    id: int,
+    upd_post: schema.PostCreate,
+    db: Session = Depends(get_db),
+    current_user: int = Depends(oauth2.get_current_user)
+):
 
     post_query = db.query(models.Post).filter(models.Post.id == id)
     post = post_query.first()
 
-    if post == None:
+    if post is None:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, 
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=f"post_id: {id} is missing"
         )
     if post.owner_id != current_user.id:
@@ -165,5 +158,3 @@ def update_post(
     db.commit()
 
     return post_query.first()
-   
-

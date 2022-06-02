@@ -6,16 +6,9 @@ from validate_email import validate_email
 import typing
 
 
-
-"""  Users """
-
 class UserCreate(BaseModel):
     email: str = 'placeholder'
     password: str = 'placeholder'
-
-    # class Config:
-    #     orm_mode = True
-
 
     @validator('email')
     def is_email_empty(cls, credential):
@@ -30,18 +23,15 @@ class UserCreate(BaseModel):
                 detail='Email is not valid'
             )
         return credential
-        
+
     @validator('password')
     def is_password_short(cls, password):
         if len(password) < 4:
             raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail='Password must be at least 4 characters long'
-        )
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail='Password must be at least 4 characters long'
+            )
         return password
-
-    
-
 
 
 class UserOut(BaseModel):
@@ -57,9 +47,6 @@ class UserLogin(BaseModel):
     email: EmailStr
     password: str
 
-
-
-""" Posts """
 
 class PostBase(BaseModel):
     title: str
@@ -89,18 +76,14 @@ class PostVotes(BaseModel):
         orm_mode = True
 
 
-""" Tokens """
-
 class Token(BaseModel):
     access_token: str
     token_type: str
 
+
 class TokenData(BaseModel):
     id: typing.Optional[str] = None
 
-
-
-""" Votes """
 
 class Vote(BaseModel):
     post_id: int

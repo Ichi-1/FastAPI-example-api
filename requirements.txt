@@ -12,6 +12,7 @@ ecdsa==0.17.0
 email-validator==1.2.1
 fastapi==0.78.0
 filelock==3.7.0
+flake8==4.0.1
 greenlet==1.1.2
 h11==0.13.0
 httptools==0.4.0
@@ -23,13 +24,16 @@ Jinja2==3.1.2
 jose==1.0.0
 Mako==1.2.0
 MarkupSafe==2.1.1
+mccabe==0.6.1
 orjson==3.6.8
 passlib==1.7.4
 psycopg2-binary==2.9.3
 py3-validate-email==1.0.5
 pyasn1==0.4.8
+pycodestyle==2.8.0
 pycparser==2.21
 pydantic==1.9.0
+pyflakes==2.4.0
 python-dotenv==0.20.0
 python-jose==3.3.0
 python-multipart==0.0.5
